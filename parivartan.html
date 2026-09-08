@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parivartan — Every law that changes, delivered to the case it changes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #131A24;
+    --ink-deep: #0C1119;
+    --ink-line: #263041;
+    --parchment: #EDE6D3;
+    --parchment-dim: #E1D8BE;
+    --parchment-line: #C9BD9C;
+    --brass: #B8863C;
+    --brass-bright: #D4A24E;
+    --seal: #7C2D2D;
+    --seal-bright: #9B3B3B;
+    --text-ink: #241F16;
+    --text-ink-soft: #55503F;
+    --text-pale: #D7DBE2;
+    --text-muted: #8792A3;
+    --radius-doc: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--ink);
+    color: var(--text-pale);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    display:flex;
+  }
+  ::selection{ background: var(--brass); color: var(--ink-deep); }
+
+  h1,h2,h3,.serif{ font-family:'Source Serif 4', serif; }
+
+  /* ---------- Rail ---------- */
+  .rail{
+    width: 272px;
+    flex-shrink:0;
+    background: var(--ink-deep);
+    border-right: 1px solid var(--ink-line);
+    padding: 28px 20px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+    min-height:100vh;
+  }
+  .brand{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .brand .mark{
+    display:flex;
+    align-items:baseline;
+    gap:9px;
+  }
+  .brand .mark .glyph{
+    width:11px;height:11px;
+    background: var(--brass);
+    transform: rotate(45deg);
+    flex-shrink:0;
+  }
+  .brand h1{
+    font-size:1.5rem;
+    font-weight:600;
+    margin:0;
+    color: var(--parchment);
+    letter-spacing:0.01em;
+  }
+  .brand p{
+    margin:6px 0 0 20px;
+    font-size:0.78rem;
+    color: var(--text-muted);
+    line-height:1.5;
+    max-width:22ch;
+  }
+
+  .modes{
+    display:flex;
+    background: var(--ink);
+    border:1px solid var(--ink-line);
+    border-radius:6px;
+    padding:3px;
+    gap:3px;
+  }
+  .modes button{
+    flex:1;
+    background:transparent;
+    border:none;
+    color: var(--text-muted);
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:0.82rem;
+    font-weight:500;
+    padding:8px 6px;
+    border-radius:4px;
+    cursor:pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .modes button.active{
+    background: var(--ink-line);
+    color: var(--parchment);
+  }
+
+  .rail-section{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .rail-label{
+    font-size:0.72rem;
+    color: var(--text-muted);
+    font-weight:500;
+  }
+  .track-form{
+    display:flex;
+    gap:6px;
+  }
+  .track-form input{
+    flex:1;
+    background: var(--ink);
+    border:1px solid var(--ink-line);
+    color: var(--text-pale);
+    border-radius:5px;
+    padding:8px 9px;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:0.82rem;
+    min-width:0;
+  }
+  .track-form input::placeholder{ color:#5C6577; }
+  .track-form input:focus{ outline:none; border-color: var(--brass); }
+  .track-form button{
+    background: var(--brass);
+    color: var(--ink-deep);
+    border:none;
+    border-radius:5px;
+    padding:0 12px;
+    font-weight:600;
+    font-size:0.82rem;
+    cursor:pointer;
+    font-family:'IBM Plex Sans',sans-serif;
+  }
+  .track-form button:hover{ background: var(--brass-bright); }
+
+  .rail-list{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+  }
+  .rail-item{
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+    padding:9px 10px;
+    border-radius:5px;
+    cursor:pointer;
+    border:1px solid transparent;
+  }
+  .rail-item:hover{ background: var(--ink); }
+  .rail-item.selected{
+    background: var(--ink);
+    border-color: var(--ink-line);
+  }
+  .rail-item .case-no{
+    font-size:0.84rem;
+    color: var(--parchment);
+    font-weight:500;
+  }
+  .rail-item .case-parties{
+    font-size:0.72rem;
+    color: var(--text-muted);
+  }
+  .rail-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:0.68rem;
+    color: var(--seal-bright);
+    margin-top:3px;
+  }
+  .rail-badge .dot{
+    width:5px;height:5px;
+    border-radius:50%;
+    background: var(--seal-bright);
+  }
+
+  .area-chip{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:9px 10px;
+    border-radius:5px;
+    cursor:pointer;
+    border:1px solid transparent;
+    font-size:0.84rem;
+    color: var(--text-pale);
+  }
+  .area-chip:hover{ background: var(--ink); }
+  .area-chip.selected{
+    background: var(--ink);
+    border-color: var(--brass);
+    color: var(--parchment);
+  }
+  .area-chip .count{
+    font-size:0.7rem;
+    color: var(--text-muted);
+  }
+
+  .rail-foot{
+    margin-top:auto;
+    font-size:0.68rem;
+    color:#4A5266;
+    line-height:1.6;
+    border-top:1px solid var(--ink-line);
+    padding-top:14px;
+  }
+
+  /* ---------- Main ---------- */
+  main{
+    flex:1;
+    padding: 40px 52px 60px;
+    max-width: 900px;
+  }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .header-block{
+    margin-bottom: 30px;
+  }
+  .eyebrow-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+    color: var(--text-muted);
+    font-size:0.82rem;
+  }
+  .eyebrow-row .sep{ color: var(--ink-line); }
+  .header-block h2{
+    font-size:1.9rem;
+    font-weight:600;
+    color: var(--parchment);
+    margin:0 0 10px;
+  }
+  .acts-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:14px;
+  }
+  .act-pill{
+    background: var(--ink-deep);
+    border:1px solid var(--ink-line);
+    color: var(--text-pale);
+    font-size:0.76rem;
+    padding:5px 11px;
+    border-radius:20px;
+  }
+
+  .month-block{
+    margin-bottom: 4px;
+    border-top: 1px solid var(--ink-line);
+  }
+  .month-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 2px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .month-head .month-name{
+    font-family:'Source Serif 4', serif;
+    font-size:1.1rem;
+    color: var(--parchment);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .month-head .month-tag{
+    font-size:0.7rem;
+    background: var(--seal);
+    color: #F3DCDC;
+    padding:2px 8px;
+    border-radius:20px;
+    font-family:'IBM Plex Sans',sans-serif;
+  }
+  .month-head .month-tag.quiet{
+    background: transparent;
+    border:1px solid var(--ink-line);
+    color: var(--text-muted);
+  }
+  .month-head .chev{
+    color: var(--text-muted);
+    transition: transform .18s ease;
+    font-size:0.8rem;
+  }
+  .month-block.open .chev{ transform: rotate(90deg); }
+
+  .month-body{
+    display:none;
+    flex-direction:column;
+    gap:12px;
+    padding: 4px 2px 24px;
+  }
+  .month-block.open .month-body{ display:flex; }
+
+  .doc-card{
+    background: var(--parchment);
+    color: var(--text-ink);
+    border-radius: var(--radius-doc);
+    padding: 16px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    position:relative;
+    border-left: 3px solid var(--brass);
+  }
+  .doc-card.is-new{ border-left-color: var(--seal); }
+  .doc-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .doc-title{
+    font-family:'Source Serif 4', serif;
+    font-size:1.02rem;
+    font-weight:600;
+    line-height:1.35;
+  }
+  .doc-date{
+    font-size:0.72rem;
+    color: var(--text-ink-soft);
+    white-space:nowrap;
+    padding-top:3px;
+  }
+  .doc-body{
+    font-size:0.86rem;
+    color: var(--text-ink-soft);
+    line-height:1.55;
+  }
+  .doc-source{
+    font-size:0.72rem;
+    color: var(--text-ink-soft);
+    margin-top:4px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .doc-source .src-dot{
+    width:4px;height:4px;
+    border-radius:50%;
+    background: var(--text-ink-soft);
+  }
+
+  .digest-areas-row{
+    display:none;
+  }
+
+  .scope-note{
+    margin-top: 38px;
+    border-top: 1px solid var(--ink-line);
+    padding-top: 16px;
+    font-size:0.78rem;
+    color: var(--text-muted);
+    line-height:1.6;
+    max-width: 62ch;
+  }
+  .scope-note strong{ color: var(--text-pale); font-weight:600;}
+
+  .demo-flag{
+    display:inline-block;
+    margin-top:22px;
+    font-size:0.68rem;
+    color:#4A5266;
+    border:1px dashed var(--ink-line);
+    padding:5px 10px;
+    border-radius:4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="brand">
+    <div class="mark">
+      <div class="glyph"></div>
+      <h1>Parivartan</h1>
+    </div>
+    <p>Every law that changes, delivered to the case it changes.</p>
+  </div>
+
+  <div class="modes">
+    <button class="active" data-mode="cases">My Cases</button>
+    <button data-mode="digest">Practice Digest</button>
+  </div>
+
+  <div class="rail-section" id="cases-rail">
+    <div class="rail-label">Track a new case</div>
+    <form class="track-form" id="track-form">
+      <input type="text" id="cnr-input" placeholder="CNR or case number">
+      <button type="submit">Add</button>
+    </form>
+    <div class="rail-label" style="margin-top:6px;">Tracked cases</div>
+    <div class="rail-list" id="case-list"></div>
+  </div>
+
+  <div class="rail-section" id="digest-rail" style="display:none;">
+    <div class="rail-label">Practice areas</div>
+    <div class="rail-list" id="area-list"></div>
+  </div>
+
+  <div class="rail-foot">
+    Sources: eCourts case data · eGazette · SEBI &amp; MCA circulars.<br>
+    Statutory changes tracked automatically — case-law reinterpretation not yet covered.
+  </div>
+</div>
+
+<main>
+
+  <!-- CASES VIEW -->
+  <div class="view active" id="view-cases">
+    <div class="header-block" id="case-header"></div>
+    <div id="case-months"></div>
+    <div class="scope-note">
+      <strong>What this shows:</strong> statutory amendments and government notifications affecting the Acts and Sections on record for this case, pulled automatically each time something new is published. It does not yet flag new case-law that reinterprets a section without a formal amendment — that's a harder matching problem, deliberately out of scope for now.
+    </div>
+  </div>
+
+  <!-- DIGEST VIEW -->
+  <div class="view" id="view-digest">
+    <div class="header-block">
+      <div class="eyebrow-row"><span>Practice Digest</span><span class="sep">·</span><span id="digest-area-name">ESG &amp; SEBI</span></div>
+      <h2 id="digest-title">This month, and every month before it.</h2>
+    </div>
+    <div id="digest-months"></div>
+  </div>
+
+  <div class="demo-flag">Demo data — illustrative entries for hackathon walkthrough, not a live feed.</div>
+</main>
+
+<script>
+/* ---------------- Mock data ---------------- */
+
+const cases = {
+  "CS(OS)-45/2025": {
+    parties: "Vibhu Agarwal & Anr. v. Mahavir Yadav & Ors.",
+    court: "Delhi High Court",
+    type: "Civil Suit (Original Side) — Property Dispute",
+    acts: ["Transfer of Property Act, 1882", "Code of Civil Procedure, 1908", "Specific Relief Act, 1963"],
+    months: [
+      { name: "September 2026", isNew: true, entries: [
+        { title: "Specific Relief Act — clarification on limitation for suits seeking injunctive relief", date: "3 Sep 2026", body: "MCA notification clarifies the computation of limitation periods in suits for perpetual injunction filed alongside a possession claim — relevant to the injunction prayer in this matter.", source: "eGazette · MCA Notification" },
+      ]},
+      { name: "August 2026", isNew: false, entries: [
+        { title: "CPC Order XXXIII — revised court-fee exemption threshold", date: "14 Aug 2026", body: "Revised income threshold for pauper-suit exemptions under Order XXXIII, applicable in Delhi and NCT courts.", source: "eGazette · Delhi Government Notification" },
+      ]},
+      { name: "July 2026", isNew: false, entries: [
+        { title: "Transfer of Property Act, Section 54 — registration requirement update", date: "9 Jul 2026", body: "State amendment tightening documentation required for registered sale-deed disputes exceeding specified value.", source: "eGazette · State Amendment" },
+      ]},
+    ]
+  },
+  "CC-112/2024": {
+    parties: "Rakesh Traders v. Suresh Enterprises",
+    court: "Tis Hazari Courts, Delhi",
+    type: "Criminal Complaint — Cheque Dishonour",
+    acts: ["Negotiable Instruments Act, 1881 — Section 138", "Code of Criminal Procedure, 1973"],
+    months: [
+      { name: "September 2026", isNew: true, entries: [
+        { title: "NI Act, Section 138 — RBI circular on electronic cheque-return codes", date: "1 Sep 2026", body: "RBI has updated the standard return-reason codes banks must cite for dishonoured cheques, affecting how dishonour is evidenced in Section 138 complaints filed after this date.", source: "eGazette · RBI Circular" },
+        { title: "Compounding of offences under Section 138 — revised guidelines", date: "17 Sep 2026", body: "Updated guidance on compounding fees and staged reduction schedule for settlement at different stages of trial.", source: "eGazette · MHA Notification" },
+      ]},
+      { name: "August 2026", isNew: false, entries: [
+        { title: "NI Act — clarification on territorial jurisdiction post-2015 amendment", date: "22 Aug 2026", body: "Follow-up notification clarifying filing jurisdiction where the cheque was presented through a collecting bank in a different state.", source: "eGazette · MCA Notification" },
+      ]},
+      { name: "July 2026", isNew: false, entries: []},
+    ]
+  },
+  "ARB.P.-33/2025": {
+    parties: "Sunrise Infra Ltd. v. National Builders Co.",
+    court: "Delhi High Court",
+    type: "Arbitration Petition",
+    acts: ["Arbitration and Conciliation Act, 1996", "Commercial Courts Act, 2015"],
+    months: [
+      { name: "September 2026", isNew: true, entries: [
+        { title: "Arbitration Act, Section 29A — extension timelines revised", date: "5 Sep 2026", body: "Amendment adjusting the default timeline for completion of arbitral proceedings and the process for seeking extensions from court.", source: "eGazette · MCA Notification" },
+      ]},
+      { name: "August 2026", isNew: false, entries: [
+        { title: "Commercial Courts Act — revised pecuniary jurisdiction threshold", date: "11 Aug 2026", body: "Threshold for matters to be heard as commercial disputes revised for Delhi NCT.", source: "eGazette · Delhi Government Notification" },
+      ]},
+      { name: "July 2026", isNew: false, entries: []},
+    ]
+  }
+};
+
+const areas = {
+  "ESG & SEBI": { count: 4, months: [
+    { name: "September 2026", isNew: true, entries: [
+      { title: "SEBI amends BRSR Core value-chain disclosure threshold", date: "2 Sep 2026", body: "SEBI has revised the value-chain disclosure percentage required under BRSR Core for the top 250 listed entities, effective from the next reporting cycle.", source: "SEBI Circular" },
+      { title: "Indian Carbon Market Portal — MRV reporting window opens", date: "10 Sep 2026", body: "Registration and MRV (Measurement, Reporting, Verification) reporting formally opened for obligated entities under the Carbon Credit Trading Scheme.", source: "Ministry of Power Notification" },
+    ]},
+    { name: "August 2026", isNew: false, entries: [
+      { title: "CBAM — updated Scope 1/2 data-sharing template for exporters", date: "19 Aug 2026", body: "Revised template for Indian exporters to share emissions data with EU importers under CBAM's transitional phase.", source: "DGFT Trade Notice" },
+    ]},
+    { name: "July 2026", isNew: false, entries: [
+      { title: "SEBI — assurance requirement extended to next 500 listed entities", date: "6 Jul 2026", body: "BRSR Core reasonable-assurance requirement extended down the listed universe by market capitalisation.", source: "SEBI Circular" },
+    ]},
+  ]},
+  "Companies Act": { count: 2, months: [
+    { name: "September 2026", isNew: true, entries: [
+      { title: "MCA revises CSR reporting format (Form CSR-2)", date: "8 Sep 2026", body: "Updated CSR-2 filing format with additional disclosure fields for implementing agencies.", source: "MCA Notification" },
+    ]},
+    { name: "August 2026", isNew: false, entries: []},
+    { name: "July 2026", isNew: false, entries: [
+      { title: "Companies (Related Party Transactions) — threshold revision", date: "12 Jul 2026", body: "Revised materiality threshold for related-party transactions requiring shareholder approval.", source: "MCA Notification" },
+    ]},
+  ]},
+  "Consumer Protection": { count: 1, months: [
+    { name: "September 2026", isNew: false, entries: []},
+    { name: "August 2026", isNew: true, entries: [
+      { title: "E-commerce entities — revised dark-pattern compliance guidelines", date: "21 Aug 2026", body: "CCPA issues updated guidelines expanding the list of prohibited dark patterns for e-commerce platforms.", source: "CCPA Guidelines" },
+    ]},
+    { name: "July 2026", isNew: false, entries: []},
+  ]},
+  "IT & Data Protection": { count: 1, months: [
+    { name: "September 2026", isNew: true, entries: [
+      { title: "DPDP Act — draft rules on consent-manager registration", date: "4 Sep 2026", body: "MeitY circulates draft rules for registration and obligations of Consent Managers under the Digital Personal Data Protection Act.", source: "MeitY Draft Rules" },
+    ]},
+    { name: "August 2026", isNew: false, entries: []},
+    { name: "July 2026", isNew: false, entries: []},
+  ]},
+};
+
+/* ---------------- Render: rail lists ---------------- */
+
+const caseListEl = document.getElementById('case-list');
+const areaListEl = document.getElementById('area-list');
+let selectedCase = Object.keys(cases)[0];
+let selectedArea = Object.keys(areas)[0];
+
+function renderCaseRail(){
+  caseListEl.innerHTML = '';
+  Object.keys(cases).forEach(cno => {
+    const c = cases[cno];
+    const newCount = c.months.filter(m=>m.isNew).reduce((a,m)=>a+m.entries.length,0);
+    const div = document.createElement('div');
+    div.className = 'rail-item' + (cno===selectedCase ? ' selected' : '');
+    div.innerHTML = `
+      <div class="case-no">${cno}</div>
+      <div class="case-parties">${c.parties.split(' v. ')[0]}</div>
+      ${newCount>0 ? `<div class="rail-badge"><span class="dot"></span>${newCount} new update${newCount>1?'s':''}</div>` : ''}
+    `;
+    div.onclick = () => { selectedCase = cno; renderCaseRail(); renderCaseView(); };
+    caseListEl.appendChild(div);
+  });
+}
+
+function renderAreaRail(){
+  areaListEl.innerHTML = '';
+  Object.keys(areas).forEach(name => {
+    const div = document.createElement('div');
+    div.className = 'area-chip' + (name===selectedArea ? ' selected' : '');
+    div.innerHTML = `<span>${name}</span><span class="count">${areas[name].count}</span>`;
+    div.onclick = () => { selectedArea = name; renderAreaRail(); renderDigestView(); };
+    areaListEl.appendChild(div);
+  });
+}
+
+/* ---------------- Render: month blocks ---------------- */
+
+function monthBlockHTML(m, idx){
+  const badge = m.entries.length
+    ? `<span class="month-tag ${m.isNew?'':'quiet'}">${m.entries.length} update${m.entries.length>1?'s':''}</span>`
+    : `<span class="month-tag quiet">No change</span>`;
+  const cards = m.entries.map(e => `
+    <div class="doc-card ${m.isNew?'is-new':''}">
+      <div class="doc-top">
+        <div class="doc-title">${e.title}</div>
+        <div class="doc-date">${e.date}</div>
+      </div>
+      <div class="doc-body">${e.body}</div>
+      <div class="doc-source"><span class="src-dot"></span>${e.source}</div>
+    </div>
+  `).join('') || `<div style="color:var(--text-muted); font-size:0.82rem; padding:2px;">Nothing new recorded this month.</div>`;
+
+  return `
+    <div class="month-block ${idx===0 ? 'open' : ''}" data-idx="${idx}">
+      <div class="month-head" onclick="this.parentElement.classList.toggle('open')">
+        <div class="month-name">${m.name} ${badge}</div>
+        <div class="chev">›</div>
+      </div>
+      <div class="month-body">${cards}</div>
+    </div>
+  `;
+}
+
+function renderCaseView(){
+  const c = cases[selectedCase];
+  document.getElementById('case-header').innerHTML = `
+    <div class="eyebrow-row"><span>${c.court}</span><span class="sep">·</span><span>${c.type}</span></div>
+    <h2>${selectedCase}</h2>
+    <div style="color:var(--text-muted); font-size:0.88rem;">${c.parties}</div>
+    <div class="acts-row">${c.acts.map(a=>`<span class="act-pill">${a}</span>`).join('')}</div>
+  `;
+  document.getElementById('case-months').innerHTML = c.months.map(monthBlockHTML).join('');
+}
+
+function renderDigestView(){
+  const a = areas[selectedArea];
+  document.getElementById('digest-area-name').textContent = selectedArea;
+  document.getElementById('digest-months').innerHTML = a.months.map(monthBlockHTML).join('');
+}
+
+/* ---------------- Mode switch ---------------- */
+
+document.querySelectorAll('.modes button').forEach(btn=>{
+  btn.onclick = () => {
+    document.querySelectorAll('.modes button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const mode = btn.dataset.mode;
+    document.getElementById('cases-rail').style.display = mode==='cases' ? 'flex' : 'none';
+    document.getElementById('digest-rail').style.display = mode==='digest' ? 'flex' : 'none';
+    document.getElementById('view-cases').classList.toggle('active', mode==='cases');
+    document.getElementById('view-digest').classList.toggle('active', mode==='digest');
+  };
+});
+
+/* ---------------- Track-case form (demo behaviour) ---------------- */
+
+document.getElementById('track-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const input = document.getElementById('cnr-input');
+  const val = input.value.trim();
+  if(!val) return;
+  const match = Object.keys(cases).find(k => k.toLowerCase() === val.toLowerCase());
+  if(match){
+    selectedCase = match;
+  } else {
+    // Demo fallback: simulate a freshly onboarded case pulling structured eCourts data
+    selectedCase = val.toUpperCase();
+    cases[selectedCase] = {
+      parties: "Party A v. Party B",
+      court: "Court record pulled from eCourts",
+      type: "Case type pulled from eCourts",
+      acts: ["Acts & Sections — fetched from eCourts case status"],
+      months: [
+        { name: "September 2026", isNew: true, entries: [
+          { title: "Monitoring started for this case", date: "Today", body: "Parivartan has read the Acts and Sections on record for this case and will surface future amendments here automatically.", source: "System" }
+        ]},
+        { name: "August 2026", isNew: false, entries: []},
+        { name: "July 2026", isNew: false, entries: []},
+      ]
+    };
+  }
+  input.value = '';
+  document.querySelectorAll('.modes button')[0].click();
+  renderCaseRail();
+  renderCaseView();
+});
+
+/* ---------------- Init ---------------- */
+renderCaseRail();
+renderAreaRail();
+renderCaseView();
+</script>
+
+</body>
+</html>
